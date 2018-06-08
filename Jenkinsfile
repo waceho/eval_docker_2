@@ -1,18 +1,18 @@
 node {
-    
-    stage("phpunit_install") {
-        sh 'apt-get install php5-mysql php5-curl'
-        sh 'yum --enablerepo=remi install phpunit'
-    }
-    stage("php_lint") {
-        sh 'find . -name "*.php" -print0 | xargs -0 -n1 php -l'
-    }
-
-    stage("phpunit") {
-        sh 'vendor/bin/phpunit'
-    }
-
-    stage("codeception") {
-        sh 'vendor/bin/codecept run'
+    checkout scm
+    withEnv(['MYTOOL_HOME=/usr/local/mytool']) {
+        docker.image("postgres:9.2").withRun() { db ->
+            withEnv(['DB_USERNAME=postgres', 'DB_PASSWORD=', "DB_HOST=db", "DB_PORT=5432"]) {
+                docker.image("redis:X").withRun() { redis ->
+                    withEnv(["REDIS_URL=redis://redis"]) {
+                        docker.build(imageName, "--file .woloxci/Dockerfile .").inside("--link ${db.id}:postgres --link ${redis.id}:redis") {
+                            sh "rake db:create"
+                            sh "rake db:migrate"
+                            sh "bundle exec rspec spec"
+                        }
+                    }
+                }
+            }
+        }
     }
 }
