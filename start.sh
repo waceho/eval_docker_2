@@ -49,22 +49,3 @@ read -p "Press any key to continue... " -n1 -s
 docker rm -f nginx
 docker volume eval_nginx
 
-cd eval
-git checkout v3
-cd nginx-php-fpm
-docker build -t nginx-php-fpm:3.0 .
-cd ../mariadb
-docker build -t mariadb:10.1 .
-cd ../
-docker-compose up -d
-
-read -p "Press any key to continue... " -n1 -s
-echo ""
-echo "###################################"
-echo " suppression containers et volumes "
-echo "###################################"
-echo ""
-read -p "Press any key to continue... " -n1 -s
-
-docker rm -f nginx mariadb
-docker volume rm eval_database eval_web eval_log
