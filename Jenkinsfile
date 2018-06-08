@@ -1,6 +1,7 @@
 node {
     
     stage("phpunit_install") {
+        sh 'apt-get install php5-mysql php5-curl'
         sh 'yum --enablerepo=remi install phpunit'
     }
     stage("php_lint") {
